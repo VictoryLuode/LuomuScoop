@@ -1,0 +1,51 @@
+{
+    "version": "10.20.9.9",
+    "description": "File backup and synchronization (GoodSync 10, nonportable, fixed version).",
+    "homepage": "https://www.goodsync.com",
+    "license": {
+        "identifier": "Shareware",
+        "url": "https://www.goodsync.com/license"
+    },
+    "url": "https://www.goodsync.com/download/GoodSync-v10-Setup.exe",
+    "hash": "9ccf34318e451ccb9826511266e3c2fa0f3acac36699deeade16c4102597c63b",
+    "installer": {
+        "script": [
+            "$setup = Join-Path $dir 'GoodSync-v10-Setup.exe'",
+            "if ((Get-AuthenticodeSignature $setup).Status -ne 'Valid') { throw 'Installer signature is not valid.' }",
+            "$process = Start-Process -FilePath $setup -ArgumentList '/S' -Verb RunAs -Wait -PassThru",
+            "if ($process.ExitCode -notin @(0, 3010)) { throw \"GoodSync installer failed: $($process.ExitCode)\" }",
+            "$exe = Join-Path $env:ProgramFiles 'Siber Systems\\GoodSync\\GoodSync.exe'",
+            "if (!(Test-Path $exe)) { $exe = Join-Path ${env:ProgramFiles(x86)} 'Siber Systems\\GoodSync\\GoodSync.exe' }",
+            "if (!(Test-Path $exe)) { throw 'GoodSync executable not found after installation.' }",
+            "if ((Get-Item $exe).VersionInfo.ProductVersion -ne $version) { throw 'Installed GoodSync version does not match manifest.' }",
+            "$helper = Join-Path (Find-BucketDirectory -Root -Name $bucket) 'scripts/goodsync-layout.ps1'",
+            "Copy-Item -LiteralPath $helper -Destination (Join-Path $dir 'goodsync-layout.ps1') -Force",
+            "$arguments = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('\"' + (Join-Path $dir 'goodsync-layout.ps1') + '\"'), '-AppDir', ('\"' + $dir + '\"'), '-PersistDir', ('\"' + $persist_dir + '\"'))",
+            "$migration = Start-Process powershell.exe -ArgumentList $arguments -Verb RunAs -Wait -PassThru",
+            "if ($migration.ExitCode -ne 0) { throw 'Scoop layout migration failed.' }"
+        ]
+    },
+    "uninstaller": {
+        "script": [
+            "$roots = @('HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall', 'HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall', 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall')",
+            "$entry = Get-ChildItem $roots -ErrorAction SilentlyContinue | Get-ItemProperty | Where-Object { $_.DisplayName -match '^GoodSync' -and $_.DisplayVersion -like '10.*' } | Select-Object -First 1",
+            "if (!$entry.UninstallString) { throw 'GoodSync 10 uninstaller was not found; no files have been removed.' }",
+            "$helper = Join-Path $dir 'goodsync-layout.ps1'",
+            "$args = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('\"' + $helper + '\"'), '-AppDir', ('\"' + $dir + '\"'), '-PersistDir', ('\"' + $persist_dir + '\"'), '-DetachOnly')",
+            "$detach = Start-Process powershell.exe -ArgumentList $args -Verb RunAs -Wait -PassThru",
+            "if ($detach.ExitCode -ne 0) { throw 'Configuration protection failed; uninstall aborted.' }",
+            "$command = $entry.UninstallString",
+            "$process = Start-Process -FilePath $env:ComSpec -ArgumentList @('/d', '/s', '/c', ('\"' + $command + ' /S\"')) -Verb RunAs -Wait -PassThru",
+            "if ($process.ExitCode -notin @(0, 3010)) { throw \"GoodSync uninstaller failed: $($process.ExitCode)\" }"
+        ]
+    },
+
+    "bin": [["program/GoodSync.exe", "goodsync10"]],
+    "shortcuts": [["program/GoodSync.exe", "GoodSync 10"]],
+    "notes": [
+        "Installs system-wide using the official installer; UAC approval is required.",
+        "Program files live under Scoop apps; client and server settings live under Scoop persist. Original paths are compatibility junctions.",
+        "Pinned to GoodSync 10.20.9.9 in Scoop. The application's own updater is independent.",
+        "Paid features require your own license."
+    ]
+}
