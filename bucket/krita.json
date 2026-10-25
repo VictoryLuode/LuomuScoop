@@ -7,9 +7,9 @@
         "url": "https://krita.org/en/about/license/"
     },
     "notes": [
-        "Portable build extracted from the official krita-x64 zip.",
-        "Settings and resources live in %APPDATA%\\krita and are shared with any other Krita version on this machine.",
-        "Shim is named krita6 so it can coexist with the 5.x 'krita' package from the extras bucket."
+        "Portable build extracted from the official krita-x64 zip (KDE stable mirror).",
+        "Settings and resources live in %APPDATA%\\krita.",
+        "Pinned to the 6.0 line without checkver/autoupdate: KDE's directory listing sorts 6.0.4.1 after 6.0.4, which would make an automatic bump downgrade."
     ],
     "architecture": {
         "64bit": {
@@ -19,19 +19,13 @@
         }
     },
     "bin": [
-        [
-            "bin\\krita.exe",
-            "krita6"
-        ],
-        [
-            "bin\\kritarunner.exe",
-            "krita6-runner"
-        ]
+        "bin\\krita.exe",
+        "bin\\kritarunner.exe"
     ],
     "shortcuts": [
         [
             "bin\\krita.exe",
-            "Krita 6"
+            "Krita"
         ]
     ]
 }
