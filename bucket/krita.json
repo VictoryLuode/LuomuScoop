@@ -1,21 +1,23 @@
 {
-    "version": "6.0.4.1",
-    "description": "A free digital painting application (Krita 6.0 portable build)",
+    "version": "6.1.0-prealpha-2687e5d4",
+    "description": "A free digital painting application (Krita 6.1 prealpha, KDE nightly CI build)",
     "homepage": "https://krita.org/",
     "license": {
         "identifier": "GPL-3.0-or-later",
         "url": "https://krita.org/en/about/license/"
     },
     "notes": [
-        "Portable build extracted from the official krita-x64 zip (KDE stable mirror).",
-        "Settings and resources live in %APPDATA%\\krita.",
-        "Pinned to the 6.0 line without checkver/autoupdate: KDE's directory listing sorts 6.0.4.1 after 6.0.4, which would make an automatic bump downgrade."
+        "Krita Next (6.1.0-prealpha) nightly build from https://cdn.kde.org/ci-builds/graphics/krita/master/windows/ - bleeding edge, for testing only.",
+        "The CI directory only keeps the newest builds, so this URL disappears once a newer nightly lands; the cached download keeps working.",
+        "Settings and resources live in %APPDATA%\\krita and in the ResourceDirectory set in kritarc, shared with any other Krita install on this machine.",
+        "Shortcut uses the unbranded classic Krita icon (scripts/krita-default.ico); the running window/taskbar icon is overridden by the nobeta_icon pykrita plugin."
     ],
+    "pre_install": "Copy-Item -LiteralPath (Join-Path (Find-BucketDirectory -Root -Name $bucket) 'scripts/krita-default.ico') -Destination (Join-Path $dir 'krita-default.ico') -Force",
     "architecture": {
         "64bit": {
-            "url": "https://download.kde.org/stable/krita/6.0.4.1/krita-x64-6.0.4.1.zip",
-            "hash": "f85eeaba95c947bf7efa31f9723f1458aa985f2f89e26afca8bf98628ce41413",
-            "extract_dir": "krita-x64-6.0.4.1"
+            "url": "https://cdn.kde.org/ci-builds/graphics/krita/master/windows/krita-x64-6.1.0-prealpha-2687e5d4.zip",
+            "hash": "c99d95fe8130950d148d47cc83f7d01f20702c2a80490d25bbd8f7c42326da07",
+            "extract_dir": "krita-x64-6.1.0-prealpha-2687e5d4"
         }
     },
     "bin": [
@@ -25,7 +27,9 @@
     "shortcuts": [
         [
             "bin\\krita.exe",
-            "Krita"
+            "Krita",
+            "",
+            "krita-default.ico"
         ]
     ]
 }
